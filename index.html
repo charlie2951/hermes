@@ -573,6 +573,7 @@
       <option value="dgfet_iv">Preset: Double gate Ge MOSFET (Lg:30nm)</option>
       <option value="bjt_ic_vce">Preset: NPN BJT Output characteristics</option>
       <option value="gaas_oi">Preset: 100nm gate length GaAs on Insulator FET</option>
+      <option value="bulk_mos">Preset: Bulk MOSFET with 100nm gate length</option>
     </select>
     <button id="runBtn" class="primary">Run Simulation</button>
     <button id="stopBtn" class="danger" disabled>Stop</button>
@@ -968,7 +969,34 @@ CONTACT NAME=SUB    TYPE=OHMIC                  X_MIN=0.000 X_MAX=0.180 Y_MIN=0.
 MODELS SRH=ON FIELD_MOB=ON LOMBARDI=ON MUN=8500.0 MUP=400.0
 
 # 6. Analysis: Id-Vgs Transfer Sweep at Vds = 0.50 V
-SOLVE TYPE=ID_VGS SWEEP=GATE FIXED=DRAIN V_START=-0.30 V_STOP=0.80 V_STEP=0.05 V_FIXED=0.50 OUTFILE=gaas_100nm_fdsoi.csv`
+SOLVE TYPE=ID_VGS SWEEP=GATE FIXED=DRAIN V_START=-0.30 V_STOP=0.80 V_STEP=0.05 V_FIXED=0.50 OUTFILE=gaas_100nm_fdsoi.csv`,
+bulk_mos:`
+# Simple Bulk MOSFET Id-Vgs Simulation: Gate length-100nm #
+# Mesh definition (x/y lines in micrometers)
+MESH X_MAX=0.2 Y_MAX=0.1 NX=50 NY=30
+
+# Regions
+REGION MATERIAL=OXIDE   X_MIN=0.05 X_MAX=0.15 Y_MIN=0.000 Y_MAX=0.005
+REGION MATERIAL=SILICON X_MIN=0.00 X_MAX=0.20 Y_MIN=0.005 Y_MAX=0.100
+
+# Doping (in cm^-3)
+DOPING TYPE=ACCEPTOR PROFILE=UNIFORM  CONC=1e17 X_MIN=0.00 X_MAX=0.20 Y_MIN=0.005 Y_MAX=0.100
+DOPING TYPE=DONOR    PROFILE=GAUSSIAN CONC=1e20 X_MIN=0.00 X_MAX=0.05 Y_MIN=0.005 Y_MAX=0.025
+DOPING TYPE=DONOR    PROFILE=GAUSSIAN CONC=1e20 X_MIN=0.15 X_MAX=0.20 Y_MIN=0.005 Y_MAX=0.025
+
+# Contacts
+CONTACT NAME=SOURCE TYPE=OHMIC X_MIN=0.00 X_MAX=0.04 Y_MIN=0.005 Y_MAX=0.005
+CONTACT NAME=DRAIN  TYPE=OHMIC X_MIN=0.16 X_MAX=0.20 Y_MIN=0.005 Y_MAX=0.005
+CONTACT NAME=GATE   TYPE=OHMIC WORKFUNC=4.75 X_MIN=0.05 X_MAX=0.15 Y_MIN=0.000 Y_MAX=0.000
+CONTACT NAME=SUB    TYPE=OHMIC X_MIN=0.00 X_MAX=0.20 Y_MIN=0.100 Y_MAX=0.100
+
+# Physics Models
+MODELS SRH=ON FIELD_MOB=ON MUN=1400 MUP=450
+
+# Analysis
+SOLVE TYPE=ID_VGS SWEEP=GATE V_START=0.0 V_STOP=1.5 V_STEP=0.05 FIXED=DRAIN V_FIXED=1.0 LOG=bulk_mos_lg100_idvgs.csv
+`
+    
 
 };
 
