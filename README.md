@@ -1,11 +1,12 @@
 
 <h2>HERMES 2D: Web-based Device Simulator — Documentation</h2>
           <p>
-            This browser-based 2D Technology Computer-Aided Design (TCAD) simulator solves the coupled Poisson and drift-diffusion equations for 2D semiconductor devices directly inside your browser using WebAssembly.
-          </p>
+            This browser-based 2D Technology Computer-Aided Design (TCAD) simulator solves the coupled Poisson and drift-diffusion equations for 2D semiconductor devices directly inside your browser using WebAssembly. </p>
 
-         <img width="540" height="240" alt="a1" src="https://github.com/user-attachments/assets/4ecc1fd9-533e-41c0-95de-64c5b18d1180" />
-          <img width="845" height="308" alt="a2" src="https://github.com/user-attachments/assets/ba00720a-3cfb-4bc2-988c-811f4be63375" />
+<img width="400" height="300" alt="a1" src="https://github.com/user-attachments/assets/4ecc1fd9-533e-41c0-95de-64c5b18d1180" />
+<img width="600" height="300" alt="image" src="https://github.com/user-attachments/assets/fac29a00-0b62-4c14-9dd2-50cfdaa0bd43" />
+<img width="1600" height="500" alt="image" src="https://github.com/user-attachments/assets/0c0ec8ab-b64d-4832-9a68-89e24ec566f5" />
+
 
 
 <h3> 1. Input Deck Syntax Reference</h3>
