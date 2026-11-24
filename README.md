@@ -38,7 +38,9 @@ SOLVE TYPE=ID_VGS SWEEP=GATE FIXED=DRAIN V_START=-0.30 V_STOP=0.80 V_STEP=0.05 V
             <li><strong>Solver Console:</strong> Monitors real-time Newton-Raphson convergence residuals and solver diagnostics. Drag the horizontal divider above the console to adjust its height.</li>
           </ul>
           
-<h3> 4. Limitations/Known Issues:</h3>
+ <h3> 4. Plotting multiple I-V graph together:</h3> <ul><li>  Download <code>plotter.py</code> and run it from the command window using <code>python3 plotter.py</code>. One interactive GUI will open. Here you can plot multiple CSV files from `Add CSV` option. You need to install Python, numpy, Pandas, Matplotlib and Python-tk to run this plotter GUI.</li></ul>    
+ 
+<h3> 5. Limitations/Known Issues:</h3>
 <ul><li><strong>One semiconductor region:</strong> This version currently supports only one type of semiconductor inside device. A mixture of two different semiconductors, such as Germanium and Silicon is not allowed.</li> <li><strong>Contact naming Restriction:</strong> Only pre-defined contact names such as DRAIN, GATE, SOURCE, SUB, GATE1 and GATE2 is supported. User defined contact names are not supported in this version.</li><li><strong>Limited Physical models:</strong> Currently, doping-dependent Caughey-Thomas mobility, Canali model for Field dependent mobility and Lombardi model for mobility degradation at interface is available. Also SRH recombination model is available. Other models will be gradually incorporated in future releases.</li>
 <li><strong>Uniform Rectangular Mesh:</strong> CUrrent Version uses a rectangular mesh uniform through whole region.</li>
 <li><strong>AC Simulation Not supported:</strong>The current Version does not support small-signal AC analysis. Only Quasi static DC analysis is possible.</li>
