@@ -27,6 +27,11 @@
       height: 100vh;
       overflow: hidden;
     }
+     .visitor-badge {
+      display: inline-flex;
+      align-items: center;
+      height: 20px;
+    }
 
     /* Header & Toolbar */
     header {
@@ -1998,5 +2003,9 @@ SOLVE TYPE=ID_VGS SWEEP=GATE FIXED=DRAIN V_START=-0.30 V_STOP=0.80 V_STEP=0.05 V
     if (lastVtkText) triggerDownload('device_final.vtk', lastVtkText);
   });
 </script>
+  <!-- Visitor Counter Badge Placed at Bottom Right (Updated Service & Icon Fix) -->
+    <div class="visitor-badge">
+      <img src="https://hits.sh/charlie2951.github.io/hermes/.svg?color=10b981&labelColor=334155&label=visitors" alt="Visitor Counter"/>
+    </div>
 </body>
 </html>
