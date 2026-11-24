@@ -3,6 +3,10 @@
           <p>
             This browser-based 2D Technology Computer-Aided Design (TCAD) simulator solves the coupled Poisson and drift-diffusion equations for 2D semiconductor devices directly inside your browser using WebAssembly.
           </p>
+
+          <img width="540" height="240" alt="image" src="https://github.com/user-attachments/assets/5e3cb361-3f6c-4f7f-8f2c-8862faa1c102" />
+          
+
 <h3> 1. Input Deck Syntax Reference</h3>
           <p>All spatial coordinates (<code>X_MIN</code>, <code>X_MAX</code>, <code>Y_MIN</code>, <code>Y_MAX</code>, <code>SIGMA_X</code>, <code>SIGMA_Y</code>) are specified in micrometers (&mu;m).</p>
           <ul>
