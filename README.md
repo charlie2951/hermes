@@ -35,13 +35,11 @@ SOLVE TYPE=ID_VGS SWEEP=GATE FIXED=DRAIN V_START=-0.30 V_STOP=0.80 V_STEP=0.05 V
             <li><strong>2D VTK &amp; Cutline Tab:</strong> Renders 2D scalar/vector field distributions on the left and a 1D cross-sectional cutline graph on the right. Choose between <em>Auto (Turbo/Viridis)</em>, <em>Turbo</em>, <em>Viridis</em>, and <em>Inferno</em> colormaps, adjust Min/Max color bounds, click anywhere on the 2D device map to move the dashed cutline, and export the active 1D slice via <em>Save Cutline CSV</em>.</li>
             <li><strong>Solver Console:</strong> Monitors real-time Newton-Raphson convergence residuals and solver diagnostics. Drag the horizontal divider above the console to adjust its height.</li>
           </ul>
-          <h3 style="color: red;">4. Limitations/Known Issues:</h3>
-          <ul>
-            <li><strong>One semiconductor region:</strong> This version currently supports only one type of semiconductor inside device. A mixture of two different semiconductor such as Germanium and Silicon is not allowed.</li>
-            <li><strong>Contact naming Restriction:</strongs> Only pre-defined contact names such as DRAIN, GATE, SOURCE, SUB, GATE1 and GATE2 is supported. User defined contact names are not supported in this version.</li>
-            <li><strong>Limited Physical models:</strong> Currently doping dependent Caughey-Thomas mobility, Canali model for Field dependent mobility and Lombardi model for mobility degradation at interface is available. Also SRH recombination model is available. Other models will be gradually incorporated in future releases.</li>
-            <li><strong>Uniform Rectangular Mesh:</strong> CUrrent Version uses a rectangular mesh uniform through whole region.</li>
-           <li><strong>AC Simulation Not supported:</strong>The current Version does not support small signal AC analysis. Only Quasi static DC analysis is possible.</li>
-          </ul>
-        </div>
-      </div>
+          
+<h3> 4. Limitations/Known Issues:</h3>
+<ul><li><strong>One semiconductor region:</strong> This version currently supports only one type of semiconductor inside device. A mixture of two different semiconductors, such as Germanium and Silicon is not allowed.</li> <li><strong>Contact naming Restriction:</strong> Only pre-defined contact names such as DRAIN, GATE, SOURCE, SUB, GATE1 and GATE2 is supported. User defined contact names are not supported in this version.</li><li><strong>Limited Physical models:</strong> Currently, doping-dependent Caughey-Thomas mobility, Canali model for Field dependent mobility and Lombardi model for mobility degradation at interface is available. Also SRH recombination model is available. Other models will be gradually incorporated in future releases.</li>
+<li><strong>Uniform Rectangular Mesh:</strong> CUrrent Version uses a rectangular mesh uniform through whole region.</li>
+<li><strong>AC Simulation Not supported:</strong>The current Version does not support small-signal AC analysis. Only Quasi static DC analysis is possible.</li>
+</ul>
+</div>
+</div>
