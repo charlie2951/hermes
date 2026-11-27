@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TCAD 2D — WebAssembly Semiconductor Simulator</title>
+  <title>HERMES 2D — WebAssembly Semiconductor Simulator</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- 2. Hammer.js (required for pan/pinch gestures) -->
 <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
@@ -721,6 +721,7 @@
             <li><code>DOPING TYPE=&lt;ACCEPTOR|DONOR&gt; PROFILE=&lt;UNIFORM|GAUSSIAN&gt; CONC=&lt;cm^-3&gt; ...</code> — Adds background or implanted impurity profiles (in cm<sup>&minus;3</sup>). Gaussian profiles accept <code>SIGMA_X</code> and <code>SIGMA_Y</code>.</li>
             <li><code>CONTACT NAME=&lt;ID&gt; TYPE=&lt;OHMIC|SCHOTTKY&gt; [WORKFUNC=&lt;eV&gt;] X_MIN=&lt;v&gt; X_MAX=&lt;v&gt; Y_MIN=&lt;v&gt; Y_MAX=&lt;v&gt;</code> — Places electrical boundary contacts along edges or interfaces.</li>
             <li><code>MODELS SRH=&lt;ON|OFF&gt; FIELD_MOB=&lt;ON|OFF&gt; LOMBARDI=&lt;ON|OFF&gt;</code> — Enables Shockley-Read-Hall recombination, velocity saturation, and surface mobility degradation models. Also support default parameter overriding by using <code>MATERIAL NAME=SILICON, VSATN=&lt;val&gt;, VSATP=&lt;val&gt;, MUN=&lt;val&gt;, MUP=&lt;val&gt;,TAUN=&lt;val&gt;,TAUP=&lt;val&gt;</code></li>
+            <li>Numeric control of Newton solver via tolerance parameters using METHOD <code>METHOD MAX_ITER=100 ATOL=1e-9 RELTOL=1e-8</code></li>
             <li>Support trap declaration between Semiconductor-oxide or Semiconductor-semiconductor interface. Support Both Donor and Acceptor traps (Gaussian type) with position from band edges. <code>INT_TRAP TYPE=ACCEPTOR MAT1=SILICON MAT2=OXIDE NIT=1e12 ET=0.1 SIGMAN=1e-15 SIGMAP=1e-15 X_MIN=0.05 X_MAX=0.15</code></li>
             <li><code>SOLVE TYPE=&lt;ID_VGS|ID_VDS&gt; SWEEP=&lt;CONTACT&gt; FIXED=&lt;CONTACT&gt; V_START=&lt;V&gt; V_STOP=&lt;V&gt; V_STEP=&lt;V&gt; V_FIXED=&lt;V&gt; OUTFILE=&lt;file.csv&gt;</code> — Runs a quasi-static DC voltage sweep and exports terminal currents in &mu;A/&mu;m.</li>
           </ul>
