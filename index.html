@@ -3,8 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HERMES 2D — WebAssembly Semiconductor Simulator</title>
+  <title>TCAD 2D — WebAssembly Semiconductor Simulator</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- 2. Hammer.js (required for pan/pinch gestures) -->
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+<!-- 3. Chart.js Zoom Plugin -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
+
   <style>
     :root {
       --bg: #0f172a;
@@ -26,11 +31,6 @@
       flex-direction: column;
       height: 100vh;
       overflow: hidden;
-    }
-     .visitor-badge {
-      display: inline-flex;
-      align-items: center;
-      height: 20px;
     }
 
     /* Header & Toolbar */
@@ -573,7 +573,6 @@
       <option value="dgfet_iv">Preset: Double gate Ge MOSFET (Lg:30nm)</option>
       <option value="bjt_ic_vce">Preset: NPN BJT Output characteristics</option>
       <option value="gaas_oi">Preset: 100nm gate length GaAs on Insulator FET</option>
-      <option value="bulk_mos">Preset: Bulk MOSFET with 100nm gate length</option>
     </select>
     <button id="runBtn" class="primary">Run Simulation</button>
     <button id="stopBtn" class="danger" disabled>Stop</button>
@@ -709,7 +708,11 @@
           <p>
             This browser-based 2D Technology Computer-Aided Design (TCAD) simulator solves the coupled Poisson and drift-diffusion equations for 2D semiconductor devices directly inside your browser using WebAssembly.
           </p>
-
+          <h3>Features</h3>
+          <p>Supports simulation of multiple semiconductor heterostructures, Drift diffusion
+            transport, Caughey-Thomas mobility model, velocity saturation effect, Interface traps,
+            Mobility degradation model(LOMBARDI). Also supports parameter override via input deck.
+          </p>
           <h3>1. Input Deck Syntax Reference</h3>
           <p>All spatial coordinates (<code>X_MIN</code>, <code>X_MAX</code>, <code>Y_MIN</code>, <code>Y_MAX</code>, <code>SIGMA_X</code>, <code>SIGMA_Y</code>) are specified in micrometers (&mu;m).</p>
           <ul>
@@ -717,18 +720,60 @@
             <li><code>REGION MATERIAL=&lt;MAT&gt; X_MIN=&lt;v&gt; X_MAX=&lt;v&gt; Y_MIN=&lt;v&gt; Y_MAX=&lt;v&gt;</code> — Assigns material regions. Supported materials include <code>SILICON</code>, <code>GERMANIUM</code>, <code>OXIDE</code>, and <code>HFO2</code>.</li>
             <li><code>DOPING TYPE=&lt;ACCEPTOR|DONOR&gt; PROFILE=&lt;UNIFORM|GAUSSIAN&gt; CONC=&lt;cm^-3&gt; ...</code> — Adds background or implanted impurity profiles (in cm<sup>&minus;3</sup>). Gaussian profiles accept <code>SIGMA_X</code> and <code>SIGMA_Y</code>.</li>
             <li><code>CONTACT NAME=&lt;ID&gt; TYPE=&lt;OHMIC|SCHOTTKY&gt; [WORKFUNC=&lt;eV&gt;] X_MIN=&lt;v&gt; X_MAX=&lt;v&gt; Y_MIN=&lt;v&gt; Y_MAX=&lt;v&gt;</code> — Places electrical boundary contacts along edges or interfaces.</li>
-            <li><code>MODELS SRH=&lt;ON|OFF&gt; FIELD_MOB=&lt;ON|OFF&gt; LOMBARDI=&lt;ON|OFF&gt;</code> — Enables Shockley-Read-Hall recombination, velocity saturation, and surface mobility degradation models. Aso support default parameter overriding by using <code>VSATN=&lt;val&gt;, VSATP=&lt;val&gt;, MUN=&lt;val&gt;, MUP=&lt;val&gt;,TAUN=&lt;val&gt;,TAUP=&lt;val&gt;</code></li>
+            <li><code>MODELS SRH=&lt;ON|OFF&gt; FIELD_MOB=&lt;ON|OFF&gt; LOMBARDI=&lt;ON|OFF&gt;</code> — Enables Shockley-Read-Hall recombination, velocity saturation, and surface mobility degradation models. Also support default parameter overriding by using <code>MATERIAL NAME=SILICON, VSATN=&lt;val&gt;, VSATP=&lt;val&gt;, MUN=&lt;val&gt;, MUP=&lt;val&gt;,TAUN=&lt;val&gt;,TAUP=&lt;val&gt;</code></li>
+            <li>Support trap declaration between Semiconductor-oxide or Semiconductor-semiconductor interface. Support Both Donor and Acceptor traps (Gaussian type) with position from band edges. <code>INT_TRAP TYPE=ACCEPTOR MAT1=SILICON MAT2=OXIDE NIT=1e12 ET=0.1 SIGMAN=1e-15 SIGMAP=1e-15 X_MIN=0.05 X_MAX=0.15</code></li>
             <li><code>SOLVE TYPE=&lt;ID_VGS|ID_VDS&gt; SWEEP=&lt;CONTACT&gt; FIXED=&lt;CONTACT&gt; V_START=&lt;V&gt; V_STOP=&lt;V&gt; V_STEP=&lt;V&gt; V_FIXED=&lt;V&gt; OUTFILE=&lt;file.csv&gt;</code> — Runs a quasi-static DC voltage sweep and exports terminal currents in &mu;A/&mu;m.</li>
           </ul>
 
           <h3>2. Example Input Deck</h3>
-          <pre>MESH X_MAX=0.090 Y_MAX=0.022 NX=46 NY=23
-REGION MATERIAL=HFO2      X_MIN=0.000 X_MAX=0.090 Y_MIN=0.000 Y_MAX=0.002
-REGION MATERIAL=GERMANIUM X_MIN=0.000 X_MAX=0.090 Y_MIN=0.002 Y_MAX=0.012
-REGION MATERIAL=OXIDE     X_MIN=0.000 X_MAX=0.090 Y_MIN=0.012 Y_MAX=0.022
-DOPING TYPE=ACCEPTOR PROFILE=UNIFORM CONC=1.0e15 X_MIN=0.000 X_MAX=0.090 Y_MIN=0.002 Y_MAX=0.012
-CONTACT NAME=GATE TYPE=SCHOTTKY WORKFUNC=4.55 X_MIN=0.030 X_MAX=0.060 Y_MIN=0.000 Y_MAX=0.000
-SOLVE TYPE=ID_VGS SWEEP=GATE FIXED=DRAIN V_START=-0.30 V_STOP=0.80 V_STEP=0.05 V_FIXED=0.50 OUTFILE=iv_output.csv</pre>
+          <pre># ============================================================================
+# 30 nm Gate-Length Double-Gate (DG) Ultra-Thin-Body nMOSFET (Id-Vgs Sweep)
+# Architecture: 2 nm Top SiO2 / 10 nm Si Body / 2 nm Bottom SiO2
+# All spatial dimensions in micrometers (um); doping in cm^-3
+# ============================================================================
+
+# 1. 2D Mesh Grid (0.090 um wide x 0.014 um thick)
+#    Uniform 1 nm X-spacing (NX=91) and 0.5 nm Y-spacing (NY=29)
+MESH X_MAX=0.090 Y_MAX=0.014 NX=91 NY=29
+
+# 2. Material Regions
+#    - Top Gate Oxide (2 nm)
+REGION MATERIAL=OXIDE   X_MIN=0.000 X_MAX=0.090 Y_MIN=0.000 Y_MAX=0.002
+#    - Silicon Channel & S/D Body (10 nm)
+REGION MATERIAL=SILICON X_MIN=0.000 X_MAX=0.090 Y_MIN=0.002 Y_MAX=0.012
+#    - Bottom Gate Oxide (2 nm)
+REGION MATERIAL=OXIDE   X_MIN=0.000 X_MAX=0.090 Y_MIN=0.012 Y_MAX=0.014
+
+# 3. Doping Profiles
+#    - Lightly doped p-type Ultra-Thin Silicon Body (N_A = 1e15 cm^-3)
+DOPING TYPE=ACCEPTOR PROFILE=UNIFORM  CONC=1.0e15 X_MIN=0.000 X_MAX=0.090 Y_MIN=0.002 Y_MAX=0.012
+
+#    - Heavy n+ Source region (x: 0.000 to 0.030 um, abrupt 2 nm roll-off)
+DOPING TYPE=DONOR    PROFILE=GAUSSIAN CONC=1.0e20 X_MIN=0.000 X_MAX=0.029 Y_MIN=0.002 Y_MAX=0.012 SIGMA_X=0.002 SIGMA_Y=0.010
+
+#    - Heavy n+ Drain region (x: 0.060 to 0.090 um, abrupt 2 nm roll-off)
+DOPING TYPE=DONOR    PROFILE=GAUSSIAN CONC=1.0e20 X_MIN=0.061 X_MAX=0.090 Y_MIN=0.002 Y_MAX=0.012 SIGMA_X=0.002 SIGMA_Y=0.010
+
+# 4. Electrodes / Contacts
+#    - Tied Top & Bottom Mid-Gap Metal Gates (x: 0.030 to 0.060 um -> Lg = 30 nm)
+CONTACT NAME=GATE1   TYPE=OHMIC WORKFUNC=4.45 X_MIN=0.030 X_MAX=0.060 Y_MIN=0.000 Y_MAX=0.000
+CONTACT NAME=GATE2   TYPE=OHMIC WORKFUNC=4.45 X_MIN=0.030 X_MAX=0.060 Y_MIN=0.014 Y_MAX=0.014
+
+#    - Full-height Sidewall Source & Drain Ohmic Contacts across the 10 nm Si body
+CONTACT NAME=SOURCE TYPE=OHMIC X_MIN=0.000 X_MAX=0.000 Y_MIN=0.002 Y_MAX=0.012
+CONTACT NAME=DRAIN  TYPE=OHMIC X_MIN=0.090 X_MAX=0.090 Y_MIN=0.002 Y_MAX=0.012
+
+# 5. Semiconductor Physics Models
+MODELS SRH=ON FIELD_MOB=ON LOMBARDI=ON  
+METHOD MAX_ITER=100 ATOL=1e-9 RELTOL=1e-8
+MATERIAL NAME=SILICON VSAT_N=7e7 LOMB_DELTAN=5e13
+#Include traps
+INT_TRAP TYPE=ACCEPTOR MAT1=SILICON MAT2=OXIDE NIT=1e12 ET=0.1 SIGMAN=1e-15 SIGMAP=1e-15 X_MIN=0.05 X_MAX=0.15
+#INT_TRAP TYPE=DONOR    SEMI=SILICON DIEL=OXIDE NIT=3e11 ET=0.30 SIGMAN=1e-15 SIGMAP=1e-15 X_MIN=0.05 X_MAX=0.15
+
+# 6. Analysis: Id-Vgs Transfer Sweep at Vds = 0.05 V (Vgs: 0.0 V -> 1.0 V)
+SOLVE TYPE=ID_VGS SWEEP=GATE1,GATE2 V_START=0.0 V_STOP=1.0 V_STEP=0.02 FIXED=DRAIN V_FIXED=0.5 OUTFILE=trans26.csv
+</pre>
 
           <h3>3. Post-Processing &amp; Visualization Guide</h3>
           <ul>
@@ -738,9 +783,8 @@ SOLVE TYPE=ID_VGS SWEEP=GATE FIXED=DRAIN V_START=-0.30 V_STOP=0.80 V_STEP=0.05 V
           </ul>
           <h3 style="color: red;">4. Limitations/Known Issues:</h3>
           <ul>
-            <li><strong>One semiconductor region:</strong> This version currently supports only one type of semiconductor inside device. A mixture of two different semiconductor such as Germanium and Silicon is not allowed.</li>
             <li><strong>Contact naming Restriction:</strongs> Only pre-defined contact names such as DRAIN, GATE, SOURCE, SUB, GATE1 and GATE2 is supported. User defined contact names are not supported in this version.</li>
-            <li><strong>Limited Physical models:</strong> Currently doping dependent Caughey-Thomas mobility, Canali model for Field dependent mobility and Lombardi model for mobility degradation at interface is available. Also SRH recombination model is available. Other models will be gradually incorporated in future releases.</li>
+            <li><strong>Limited Physical models:</strong> Currently interface traps, doping dependent Caughey-Thomas mobility, Canali model for Field dependent mobility and Lombardi model for mobility degradation at interface is available. Also SRH recombination model is available. Other models will be gradually incorporated in future releases.</li>
             <li><strong>Uniform Rectangular Mesh:</strong> CUrrent Version uses a rectangular mesh uniform through whole region.</li>
            <li><strong>AC Simulation Not supported:</strong>The current Version does not support small signal AC analysis. Only Quasi static DC analysis is possible.</li>
           </ul>
@@ -969,34 +1013,7 @@ CONTACT NAME=SUB    TYPE=OHMIC                  X_MIN=0.000 X_MAX=0.180 Y_MIN=0.
 MODELS SRH=ON FIELD_MOB=ON LOMBARDI=ON MUN=8500.0 MUP=400.0
 
 # 6. Analysis: Id-Vgs Transfer Sweep at Vds = 0.50 V
-SOLVE TYPE=ID_VGS SWEEP=GATE FIXED=DRAIN V_START=-0.30 V_STOP=0.80 V_STEP=0.05 V_FIXED=0.50 OUTFILE=gaas_100nm_fdsoi.csv`,
-bulk_mos:`
-# Simple Bulk MOSFET Id-Vgs Simulation: Gate length-100nm #
-# Mesh definition (x/y lines in micrometers)
-MESH X_MAX=0.2 Y_MAX=0.1 NX=50 NY=30
-
-# Regions
-REGION MATERIAL=OXIDE   X_MIN=0.05 X_MAX=0.15 Y_MIN=0.000 Y_MAX=0.005
-REGION MATERIAL=SILICON X_MIN=0.00 X_MAX=0.20 Y_MIN=0.005 Y_MAX=0.100
-
-# Doping (in cm^-3)
-DOPING TYPE=ACCEPTOR PROFILE=UNIFORM  CONC=1e17 X_MIN=0.00 X_MAX=0.20 Y_MIN=0.005 Y_MAX=0.100
-DOPING TYPE=DONOR    PROFILE=GAUSSIAN CONC=1e20 X_MIN=0.00 X_MAX=0.05 Y_MIN=0.005 Y_MAX=0.025
-DOPING TYPE=DONOR    PROFILE=GAUSSIAN CONC=1e20 X_MIN=0.15 X_MAX=0.20 Y_MIN=0.005 Y_MAX=0.025
-
-# Contacts
-CONTACT NAME=SOURCE TYPE=OHMIC X_MIN=0.00 X_MAX=0.04 Y_MIN=0.005 Y_MAX=0.005
-CONTACT NAME=DRAIN  TYPE=OHMIC X_MIN=0.16 X_MAX=0.20 Y_MIN=0.005 Y_MAX=0.005
-CONTACT NAME=GATE   TYPE=OHMIC WORKFUNC=4.75 X_MIN=0.05 X_MAX=0.15 Y_MIN=0.000 Y_MAX=0.000
-CONTACT NAME=SUB    TYPE=OHMIC X_MIN=0.00 X_MAX=0.20 Y_MIN=0.100 Y_MAX=0.100
-
-# Physics Models
-MODELS SRH=ON FIELD_MOB=ON MUN=1400 MUP=450
-
-# Analysis
-SOLVE TYPE=ID_VGS SWEEP=GATE V_START=0.0 V_STOP=1.5 V_STEP=0.05 FIXED=DRAIN V_FIXED=1.0 LOG=bulk_mos_lg100_idvgs.csv
-`
-    
+SOLVE TYPE=ID_VGS SWEEP=GATE FIXED=DRAIN V_START=-0.30 V_STOP=0.80 V_STEP=0.05 V_FIXED=0.50 OUTFILE=gaas_100nm_fdsoi.csv`
 
 };
 
@@ -1300,10 +1317,11 @@ SOLVE TYPE=ID_VGS SWEEP=GATE V_START=0.0 V_STOP=1.5 V_STEP=0.05 FIXED=DRAIN V_FI
       datasets: [{
         label: 'I_DRAIN (µA/µm)',
         data: [],
-        borderColor: '#38bdf8',
+        borderColor: '#f59e0b',
         backgroundColor: 'rgba(56, 189, 248, 0.15)',
         borderWidth: 2,
-        pointRadius: 3,
+        pointRadius: 0, //set to 3 for line+symbol
+        pointHoverRadius: 4,//shows value when mouse hovers
         tension: 0.15
       }]
     },
@@ -1324,7 +1342,18 @@ SOLVE TYPE=ID_VGS SWEEP=GATE V_START=0.0 V_STOP=1.5 V_STEP=0.05 FIXED=DRAIN V_FI
         }
       },
       plugins: {
-        legend: { labels: { color: '#f1f5f9', boxWidth: 12 } }
+        legend: { labels: { color: '#f1f5f9', boxWidth: 12 } },
+        zoom: {
+          zoom: {
+          wheel: { enabled: true },
+          pinch: { enabled: true },
+          mode: 'x' // Scale both axes (use 'x' or 'y' to lock to one axis)
+        },
+    pan: {
+      enabled: true,
+      mode: 'xy'
+    }
+  }
       }
     }
   });
@@ -1431,7 +1460,7 @@ SOLVE TYPE=ID_VGS SWEEP=GATE V_START=0.0 V_STOP=1.5 V_STEP=0.05 FIXED=DRAIN V_FI
         borderColor: '#facc15',
         backgroundColor: 'rgba(250, 204, 21, 0.12)',
         borderWidth: 2,
-        pointRadius: 2,
+        pointRadius: 0,//only line chart
         tension: 0.1
       }]
     },
@@ -1440,7 +1469,7 @@ SOLVE TYPE=ID_VGS SWEEP=GATE V_START=0.0 V_STOP=1.5 V_STEP=0.05 FIXED=DRAIN V_FI
       maintainAspectRatio: false,
       scales: {
         x: {
-          title: { display: true, text: 'Position (um)', color: '#94a3b8' },
+          title: { display: true, text: 'Position (nm)', color: '#94a3b8' },
           ticks: { color: '#cbd5e1', maxTicksLimit: 8 },
           grid: { color: '#1e293b' }
         },
@@ -1841,17 +1870,17 @@ SOLVE TYPE=ID_VGS SWEEP=GATE V_START=0.0 V_STOP=1.5 V_STEP=0.05 FIXED=DRAIN V_FI
       const p = parsedVtk.points[i];
       const dist = (cutAxis === 'x') ? Math.abs(p.y - cutPosPhys) : Math.abs(p.x - cutPosPhys);
       if (dist <= tol) {
-        slice.push({ pos: (cutAxis === 'x' ? p.x : p.y) * 1e4, val: rawVals[i] });
+        slice.push({ pos: (cutAxis === 'x' ? p.x : p.y) * 1e3, val: rawVals[i] });
       }
     }
     slice.sort((a, b) => a.pos - b.pos);
     lastCutlineSlice = slice;
     downloadCutlineBtn.disabled = slice.length === 0;
 
-    cutlineChart.data.labels = slice.map(s => s.pos.toFixed(4));
-    cutlineChart.data.datasets[0].label = `${fieldName} along ${cutAxis === 'x' ? 'y' : 'x'} = ${(cutPosPhys * 1e4).toFixed(4)} um`;
+    cutlineChart.data.labels = slice.map(s => s.pos.toFixed(1));
+    cutlineChart.data.datasets[0].label = `${fieldName} along ${cutAxis === 'x' ? 'y' : 'x'} = ${(cutPosPhys * 1e3).toFixed(1)} nm`;
     cutlineChart.data.datasets[0].data = slice.map(s => s.val);
-    cutlineChart.options.scales.x.title.text = cutAxis === 'x' ? 'Channel X Position (um)' : 'Depth Y Position (um)';
+    cutlineChart.options.scales.x.title.text = cutAxis === 'x' ? 'Channel X Position (nm)' : 'Depth Y Position (nm)';
     cutlineChart.update();
   }
 
@@ -1893,10 +1922,10 @@ SOLVE TYPE=ID_VGS SWEEP=GATE V_START=0.0 V_STOP=1.5 V_STEP=0.05 FIXED=DRAIN V_FI
   downloadCutlineBtn.addEventListener('click', () => {
     if (!parsedVtk || lastCutlineSlice.length === 0) return;
     const fieldName = vtkFieldSelect.value || 'Field';
-    const posHeader = cutAxis === 'x' ? 'X_Position_um' : 'Y_Position_um';
+    const posHeader = cutAxis === 'x' ? 'X_Position_nm' : 'Y_Position_nm';
     const fixedCoordLabel = cutAxis === 'x'
-      ? `y_${(cutPosPhys * 1e4).toFixed(4)}um`
-      : `x_${(cutPosPhys * 1e4).toFixed(4)}um`;
+      ? `y_${(cutPosPhys * 1e3).toFixed(1)}nm`
+      : `x_${(cutPosPhys * 1e3).toFixed(1)}nm`;
 
     const csvLines = [`${posHeader},${fieldName}`];
     for (const pt of lastCutlineSlice) {
@@ -1934,7 +1963,7 @@ SOLVE TYPE=ID_VGS SWEEP=GATE V_START=0.0 V_STOP=1.5 V_STEP=0.05 FIXED=DRAIN V_FI
     }
     const fieldName = vtkFieldSelect.value;
     const val = parsedVtk.fields[fieldName]?.[bestIdx];
-    vtkHoverInfo.textContent = `x=${(xPhys * 1e4).toFixed(4)}um, y=${(yPhys * 1e4).toFixed(4)}um | ${val !== undefined ? val.toExponential(3) : '--'}`;
+    vtkHoverInfo.textContent = `x=${(xPhys * 1e3).toFixed(1)}nm, y=${(yPhys * 1e3).toFixed(1)}nm | ${val !== undefined ? val.toExponential(3) : '--'}`;
   });
 
   // --- Simulation Execution ---
@@ -2031,9 +2060,5 @@ SOLVE TYPE=ID_VGS SWEEP=GATE V_START=0.0 V_STOP=1.5 V_STEP=0.05 FIXED=DRAIN V_FI
     if (lastVtkText) triggerDownload('device_final.vtk', lastVtkText);
   });
 </script>
-  <!-- Visitor Counter Badge Placed at Bottom Right (Updated Service & Icon Fix) -->
-    <div class="visitor-badge">
-      <img src="https://hits.sh/charlie2951.github.io/hermes/.svg?color=10b981&labelColor=334155&label=visitors" alt="Visitor Counter"/>
-    </div>
 </body>
 </html>
