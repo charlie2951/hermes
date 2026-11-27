@@ -573,6 +573,7 @@
       <option value="dgfet_iv">Preset: Double gate Ge MOSFET (Lg:30nm)</option>
       <option value="bjt_ic_vce">Preset: NPN BJT Output characteristics</option>
       <option value="gaas_oi">Preset: 100nm gate length GaAs on Insulator FET</option>
+      <option value="si_sige_pmos">Preset: Si-SiGe Quantum Well PMOS</option>
     </select>
     <button id="runBtn" class="primary">Run Simulation</button>
     <button id="stopBtn" class="danger" disabled>Stop</button>
@@ -1014,7 +1015,43 @@ CONTACT NAME=SUB    TYPE=OHMIC                  X_MIN=0.000 X_MAX=0.180 Y_MIN=0.
 MODELS SRH=ON FIELD_MOB=ON LOMBARDI=ON MUN=8500.0 MUP=400.0
 
 # 6. Analysis: Id-Vgs Transfer Sweep at Vds = 0.50 V
-SOLVE TYPE=ID_VGS SWEEP=GATE FIXED=DRAIN V_START=-0.30 V_STOP=0.80 V_STEP=0.05 V_FIXED=0.50 OUTFILE=gaas_100nm_fdsoi.csv`
+SOLVE TYPE=ID_VGS SWEEP=GATE FIXED=DRAIN V_START=-0.30 V_STOP=0.80 V_STEP=0.05 V_FIXED=0.50 OUTFILE=gaas_100nm_fdsoi.csv`,
+
+    si_sige_pmos:`
+    # ==============================================================================
+# 100 nm Si-Cap / Si0.7Ge0.3 Quantum-Well p-MOSFET Input Deck
+# ==============================================================================
+
+MESH X_MAX=0.240 Y_MAX=0.050 NX=121 NY=51
+
+# 1. Material Stack: 2 nm HfO2 -> 2 nm Si Cap -> 8 nm SiGe QW -> 38 nm Si Body
+REGION MATERIAL=HFO2    X_MIN=0.000 X_MAX=0.240 Y_MIN=0.000 Y_MAX=0.002
+REGION MATERIAL=SILICON X_MIN=0.000 X_MAX=0.240 Y_MIN=0.002 Y_MAX=0.004
+REGION MATERIAL=SIGE    X_MIN=0.000 X_MAX=0.240 Y_MIN=0.004 Y_MAX=0.012
+REGION MATERIAL=SILICON X_MIN=0.000 X_MAX=0.240 Y_MIN=0.012 Y_MAX=0.050
+
+# 2. Doping Profiles (n-well body + p+ Source/Drain)
+DOPING TYPE=DONOR    PROFILE=UNIFORM  CONC=1.0e17 X_MIN=0.000 X_MAX=0.240 Y_MIN=0.002 Y_MAX=0.050
+DOPING TYPE=ACCEPTOR PROFILE=GAUSSIAN CONC=5.0e19 X_MIN=0.000 X_MAX=0.068 Y_MIN=0.002 Y_MAX=0.025 SIGMA_X=0.004 SIGMA_Y=0.005
+DOPING TYPE=ACCEPTOR PROFILE=GAUSSIAN CONC=5.0e19 X_MIN=0.172 X_MAX=0.240 Y_MIN=0.002 Y_MAX=0.025 SIGMA_X=0.004 SIGMA_Y=0.005
+
+# 3. Electrodes (100 nm Gate from x=0.070 to 0.170, p-metal workfunction 4.95 eV)
+CONTACT NAME=GATE   TYPE=OHMIC WORKFUNC=4.95 X_MIN=0.070 X_MAX=0.170 Y_MIN=0.000 Y_MAX=0.000
+CONTACT NAME=SOURCE TYPE=OHMIC X_MIN=0.000 X_MAX=0.000 Y_MIN=0.002 Y_MAX=0.025
+CONTACT NAME=DRAIN  TYPE=OHMIC X_MIN=0.240 X_MAX=0.240 Y_MIN=0.002 Y_MAX=0.025
+CONTACT NAME=SUB    TYPE=OHMIC X_MIN=0.000 X_MAX=0.240 Y_MIN=0.050 Y_MAX=0.050
+
+# Editing default material parameters
+MATERIAL NAME=SI  MU_N0=1500 VSAT_N=3.0e7
+MATERIAL NAME=SIGE   MU_N0=1600 MU_P0=600 VSAT_N=5e7 VSAT_P=3e7
+
+# 4. Physical Models
+MODELS SRH=ON FIELD_MOB=ON LOMBARDI=ON
+METHOD MAX_ITER=100 ATOL=1e-9 RELTOL=1e-8
+
+# 5. p-MOSFET Sweeps (Negative Vgs and Vds)
+SOLVE TYPE=ID_VGS SWEEP=GATE  V_START=0.0 V_STOP=-1.2 V_STEP=-0.025 FIXED=DRAIN V_FIXED=-1.00 OUTFILE=sige_pmos_sat1.csv
+    `
 
 };
 
